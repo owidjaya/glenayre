@@ -1,4 +1,8 @@
 # Manure Order Manager
+
+## Screenshot
+![screenshot](/screenshot.JPG?raw=true "Screenshot")
+
 ## Requirements 
 To deploy this web application,  it requires the following things:
 * Apache: 2.2 or later
