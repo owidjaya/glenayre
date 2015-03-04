@@ -21,8 +21,7 @@ $app->register(new Silex\Provider\TwigServiceProvider(), array(
 $app['debug'] = true;
 $key_file = __DIR__."/../config/key.json";
 
-$title = 'glenayre_scouts_manure_2015_oscar';
-$title = 'test';
+$title = 'glenayre_scouts_manure_2015';
 $worksheetTitle= 'master';
 $columns = [
 	["name"=>"Street", "id"=>"street"],
