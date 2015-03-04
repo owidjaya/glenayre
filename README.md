@@ -19,3 +19,5 @@ To deploy this web application,  it requires the following things:
 * Setup Virtual hosts to serve from the <web-app-root>/web
 * Place the **key.json** above to <web-app-root>/config
 
+## Post Installation
+* For the glenayre_scouts_manure_2015 spreadsheet to work with the Manure Order Manager, **copy the header on line 10 to above line 1**
