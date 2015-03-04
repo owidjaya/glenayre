@@ -19,9 +19,9 @@ To deploy this web application,  it requires the following things:
   * Hit the **Download JSON** to save the **key.json** file.
   
 ## Installation
-* Clone this repository to own local filesystem. once clone is done, this directory will be referenced as **<web-app-root>**
-* Setup Virtual hosts to serve from the **<web-app-root>/web**
-* Place the **key.json** above to **<web-app-root>/config**
+* Clone this repository to own local filesystem. once clone is done, this directory will be referenced as **<web-app-root markdown>**
+* Setup Virtual hosts to serve from the **<web-app-root markdown>/web**
+* Place the **key.json** above to **<web-app-root markdown>/config**
 
 ## Post Installation
 * For the glenayre_scouts_manure_2015 spreadsheet to work with the Manure Order Manager, **copy the header on line 10 to above line 1**
