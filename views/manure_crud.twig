@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Welcome to Manure Order Manager</title>
+	<!-- Latest compiled and minified CSS -->
+ 	<link rel="stylesheet" href="/css/bootstrap.min.css">
+ 	<link rel="stylesheet" href="/css/united-bootstrap.min.css">
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="/css/bootstrap-theme.min.css">
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+	<script src="/js/bootstrap.min.js"></script>
+
+	<script src="http://knockoutjs.com/downloads/knockout-3.3.0.js"></script>
+	<script type='text/javascript'>
+		$(document).ready(function(){
+			function ManureViewModel(columns){
+				var self = this;
+				self.header = ko.observable({});
+				self.rows = ko.observableArray([]);
+				self.columns = columns;
+				self.submitted = ko.observable(false);
+				self.loadingData = ko.observable(false);
+				self.line = {};
+				self.filter = {};
+				for(var i = 0; i < self.columns.length; i++){
+					self.line[self.columns[i].id] = ko.observable();
+					self.filter[self.columns[i].id] = ko.observable();
+				}
+				self.selectedLine = ko.observable();
+				self.filteredRows = ko.computed(function(){
+					return ko.utils.arrayFilter(this.rows(), function(item) {
+						var toReturn = true;
+						for(var prop in this.filter){
+							toReturn = toReturn && item[prop].toLowerCase().indexOf(this.filter[prop]() == undefined ?"":this.filter[prop]().toLowerCase()) !== -1;
+						}
+						return toReturn;
+ 					}.bind(this));
+				}, self);
+
+				self.modifyLine = function(line, line_num){
+					for(var prop in self.line){
+						self.line[prop](line[prop]);
+					}
+					$('#myModal').modal('show');
+					self.selectedLine(line_num);
+				}
+				self.submitModification = function(){
+					self.setSubmitted(true);
+					data = {
+						"line_num": self.selectedLine(),
+						"line": self.line
+					};
+					$.ajax({
+						url: "/",
+						data: data,
+						type: "PUT",
+						dataType: "json",
+					})
+					.done(function(data){
+					})
+					.always(function(data){
+						if(data.responseText == "success"){
+							self.setSubmitted(false);
+							self.getData();							
+							$('#myModal').modal('hide');
+						}
+					})
+					.fail(function(){
+
+					});
+				}
+				self.setSubmitted = function(submitted){
+					self.submitted(submitted);
+				}
+				self.openNewForm = function(){
+					self.selectedLine(null);
+					for(var prop in self.line){
+						self.line[prop]("");
+					}
+					$('#myModal').modal('show');
+
+				}
+				self.removeLine = function(line_num){
+					self.setSubmitted(true);
+					data = {
+						"line_num": line_num
+					};
+					$.ajax({
+						url: "/",
+						data: data,
+						type: "DELETE",
+						dataType: "json",
+					})
+					.done(function(data){
+					})
+					.always(function(data){
+						if(data.responseText == "success"){
+							self.getData();							
+							self.setSubmitted(false);
+						}
+					})
+					.fail(function(){
+
+					});	
+
+				}
+				self.addLine = function(){
+					self.setSubmitted(true);
+					data = {
+						"line": self.line
+					};
+					$.ajax({
+						url: "/",
+						data: data,
+						type: "POST",
+						dataType: "json",
+					})
+					.done(function(data){
+					})
+					.always(function(data){
+						if(data.responseText == "success"){
+							self.getData();							
+							self.setSubmitted(false);
+							$('#myModal').modal('hide');
+						}
+					})
+					.fail(function(){
+
+					});	
+				}
+				self.getData = function(){
+					self.loadingData(true);
+					$.get("/sheetData").done(function(data){
+						self.loadingData(false);
+						self.header(data.header);
+						self.rows(data.rows);
+					}.bind(self))
+
+				}
+				self.resetFilter= function(){
+					for(var prop in self.filter){
+						self.filter[prop]("");
+					}
+				}
+				self.getData();
+			}
+			ko.applyBindings(new ManureViewModel({{columns|raw }}));
+		})
+	</script>
+	<style>
+		.filterForm{
+			padding:0px;
+		}
+		.entry-button-section {
+			border-right-style:solid;
+		}
+		.angledHeader{
+			white-space: nowrap;
+		}
+		.angledHeader div {
+			transform: rotate(315deg);
+			width:40px;
+			text-transform: capitalize;
+		}
+		.nowrap{
+			white-space: nowrap;
+		}
+		.form-group{
+			margin-bottom: 2px;
+		}
+		.row.affix{
+			z-index: 10;
+			top:0px;
+		}
+		td {
+			max-width:100px;
+		}
+		.large-text{
+			font-size: x-large;
+		}
+	</style>
+</head>
+<body>
+
+<div id="container">
+	<h3>Welcome to Manure Order Manager</h3>
+
+	<div id="body" class="container">
+			<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+				 <div class="modal-dialog modal-lg">
+				    <div class="modal-content">
+				    	<div class="modal-header">
+				    		<h4 class="modal-title" id="myModalLabel">Order Form</h4>
+				    	</div>
+				    	<div class="modal-body">
+							<div class='row'>
+								<div class="col-lg-12" >
+									<form class='form-horizontal form-group-sm' data-bind='foreach: columns'>
+										<div class="form-group">
+											<label data-bind="attr:{for: {$data.id}" class='col-sm-3 control-label'><small data-bind="text:$data.name + ':'"></small></label>
+											<div class='col-sm-9'>		
+												<input type="text" data-bind='attr:{id: $data.id},value:$parent.line[$data.id]' class="form-control">
+											</div>
+										</div>
+									</form>
+								</div>
+							</div>
+				    	</div>
+				    	<div class="modal-footer">
+				    		<button type="button" class="btn btn-warning" data-dismiss="modal" data-bind='attr:{disabled:submitted}'>Close</button>
+				    		<button type="button" class="btn btn-primary" data-bind='attr:{disabled:submitted},click:function(data,event){if($root.selectedLine() == null){ $root.addLine() } else { $root.submitModification()}}'>
+					    		<i class='fa fa-spinner fa-spin' data-bind='visible: submitted()' /></i>
+				    			<span data-bind='text: submitted() ?"Saving...":"Save Changes"'></span>
+				    		</button>
+				    	</div>
+				    </div>
+				</div>
+			</div>
+			<div class="row well" data-spy="affix" data-offset-top="50">
+				<div class='pull-left' >
+				<button  class="btn btn-sm btn-primary" data-bind='click:openNewForm'><span class='glyphicon glyphicon-plus'></span> Add Entry</button></div>
+				<div class='col-lg-11 '>
+						<div class='col-lg-1'><i class='fa fa-filter'></i>Filter:</div>
+						<div class='col-lg-10' class='filterForm'>
+							<form class='form-inline'>
+								<!-- ko foreach:columns -->
+								<div class="form-group">
+									<label class="sr-only" data-bind="text:$data.name, attr:{for: $data.id + 'filter'}">Email address</label>
+									<input class="form-control input-sm" data-bind='attr:{placeholder:"Filter " + $data.name},value: $parent.filter[$data.id]'>
+								</div>
+								<!-- /ko -->
+									<button type='button' class='btn btn-warning btn-xs pull-right' data-bind='click: resetFilter'>Reset</button>
+							</form>
+						</div>
+				</div>
+			</div>
+			<div class="col-lg-12 navbar-fixed-bottom" data-bind='visible:loadingData()'><div class='bg-primary pull-right text-center col-lg-2'><i class='fa fa-cog fa-spin' ></i> Loading Data....</div></div>
+			<div class="row">
+				<div class="col-lg-8"> 
+					<table class="table table-striped table-hover">
+						<caption>Manure Order Table</caption>
+						<thead>
+							<tr>
+								<th class="angledHeader"><div><span class="label label-success">Modify</span></div></th>
+								<th class="angledHeader"><div><span class="label label-danger">Delete</span></div></th>
+								<!-- ko foreach: header -->
+								<th class="angledHeader"><div data-bind='text: $data.header'><div></th>
+								<!-- /ko -->
+							</tr>
+						</thead>
+						<tbody data-bind="foreach: filteredRows">
+							<tr>	
+								<td><button class='btn btn-success' data-bind='click:function(data,event){ $parent.modifyLine(data, $index()) }'><span class='glyphicon glyphicon-wrench'></span></button></td>
+								<td><button class='btn btn-danger' data-bind='click:function(data,event){ $parent.removeLine($index()) }'><span class='glyphicon glyphicon-remove'></span></button></td>
+
+								<td > <span data-bind='text: $data.street'></span> </td>
+								<td > <span data-bind='text: $data.number'></span> </td>
+								<td > <span data-bind='text: $data.city'></span> </td>
+								<td > <span data-bind='text: $data.contact'></span> </td>
+								<td > <span data-bind='text: $data.phone'></span> </td>
+								<td > <span data-bind='text: $data.callercomments'></span> </td>
+								<td > <span data-bind='text: $data.ordermethod'></span> </td>
+								<td > <span data-bind='text: $data.mushroom'></span> </td>
+								<td > <span data-bind='text: $data.steer'></span> </td>
+								<td > <span data-bind='text: $data.topsoil'></span> </td>
+								<td > <span data-bind='text: $data.paymentcomment'></span> </td>
+								<td > <span data-bind='text: $data.paymentamount'></span> </td>
+								<td > <span data-bind='text: $data.pickupordelivery'></span> </td>
+								<td > <span data-bind='text: $data.pickupordeliverycomment'></span> </td>
+								<td > <span data-bind='text: $data.generalcomments'></span> </td>
+								<td > <span data-bind='text: $data.driverorstatus'></span> </td>
+								<td > <span data-bind='text: $data.email'></span> </td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+	</div>
+</div>
+
+</body>
+</html>

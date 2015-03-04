@@ -1,0 +1,8 @@
+{
+    "require": {
+        "silex/silex": "~1.2",
+        "twig/twig": "~1.18",
+        "google/apiclient": "~1.1",
+        "asimlqt/php-google-spreadsheet-client": "~2.3"
+    }
+}
