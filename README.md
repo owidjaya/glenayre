@@ -13,6 +13,7 @@ To deploy this web application,  it requires the following things:
   * In the **Authorized Redirect Uris** box enter the callback to complete the oauth authentication. in this webapp http://<domain>/auth
   * Enter http://<domain> in **Authorized Javascript Origins**
   * Hit the **Download JSON** to save the **key.json** file.
+  
 ## Installation
 * Clone this repository to own local filesystem. once clone is done, this directory will be referenced as <web-app-root>
 * Setup Virtual hosts to serve from the <web-app-root>/web
