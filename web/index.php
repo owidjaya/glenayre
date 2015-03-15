@@ -21,7 +21,7 @@ $app->register(new Silex\Provider\TwigServiceProvider(), array(
 $app['debug'] = true;
 $key_file = __DIR__."/../config/key.json";
 
-$title = 'glenayre_scouts_manure_2015';
+$title = 'glenayre_scouts_manure_2015_oscar';
 $worksheetTitle= 'master';
 $columns = [
 	["name"=>"Street", "id"=>"street"],
@@ -31,16 +31,16 @@ $columns = [
 	["name"=>"Phone", "id"=>"phone"],
 	["name"=>"Caller Comments", "id"=>"callercomments"],
 	["name"=>"Order Method", "id"=>"ordermethod"],
-	["name"=>"Mushroom", "id"=>"mushroom"],
-	["name"=>"Steer", "id"=>"steer"],
-	["name"=>"Topsoil", "id"=>"topsoil"],
+	["name"=>"Mushroom", "id"=>"mushroom", "type"=>"digit"],
+	["name"=>"Steer", "id"=>"steer","type"=>"digit"],
+	["name"=>"Topsoil", "id"=>"topsoil", "type" =>"digit"],
 	["name"=>"Payment Comment", "id"=>"paymentcomment"],
-	["name"=>"Payment Amount", "id"=>"paymentamount"],
 	["name"=>"Pickup or Delivery", "id"=>"pickupordelivery"],
 	["name"=>"Pickup or Delivery Comment", "id"=>"pickupordeliverycomment"],
 	["name"=>"General Comments", "id"=>"generalcomments"],
-	["name"=>"Driver or Status", "id"=>"driverorstatus"],
-	["name"=>"Email", "id"=>"email"]
+	["name"=>"Email", "id"=>"email", "type" =>"email"],
+	["name"=>"Payment Amount", "id"=>"paymentamount"],
+	["name"=>"Driver or Status", "id"=>"driverorstatus"]
 ];
 $app->get('/', function () use ($columns, $app, $key_file) {
 	if (isset($_SESSION['access_token']) && $_SESSION['access_token']) {
@@ -104,7 +104,11 @@ $app->get('/sheetData', function() use($app, $title, $worksheetTitle,  $key_file
 	$rows = array();
 	$output = array();
 	for($i = 11; $i < count($listEntries); $i++){
+		
 		$vals = $listEntries[$i]->getValues();
+		if(strpos($vals['street'], "INSERT-DATA-ROWS-ABOVE-THIS-ONE-MARKER") !== false || strpos($vals['street'], "TOTALS") !== false){
+			continue;
+		}
 		$rows[] = $vals;
 	}
 	return new JsonResponse(array("rows"=>$rows, "header" => $header));
