@@ -110,6 +110,8 @@
 					}
 					if(!valid){
 							self.setSubmitted(false);
+							window.scrollTo(0, 0);
+							
 					}
 					else{
 						data = {
@@ -180,23 +182,36 @@
 					data = {
 						"line": self.line
 					};
-					$.ajax({
-						url: "/",
-						data: data,
-						type: "POST",
-						dataType: "json",
-					})
-					.done(function(data){
-					})
-					.always(function(data){
-						if(data.responseText == "success"){
-							self.getData();							
-							self.setSubmitted(false);
-							$('#myModal').modal('hide');
-						}
-					})
-					.fail(function(){
-					});	
+					var valid = true;
+					for(prop in self.line){
+						if(self.line[prop].isValid)
+							valid = valid && self.line[prop].isValid();
+						else
+							continue;
+					}
+					if(!valid){
+						self.setSubmitted(false);
+						window.scrollTo(0, 0);
+					}
+					else{
+						$.ajax({
+							url: "/",
+							data: data,
+							type: "POST",
+							dataType: "json",
+						})
+						.done(function(data){
+						})
+						.always(function(data){
+							if(data.responseText == "success"){
+								self.getData();							
+								self.setSubmitted(false);
+								$('#myModal').modal('hide');
+							}
+						})
+						.fail(function(){
+						});	
+					}
 				}
 				self.getData = function(){
 					self.loadingData(true);
@@ -265,112 +280,157 @@
 			color:white;
 			padding:5px;
 		}
+		@media print{
+			.modal-open #body{
+				display: none;
+			}
+			.modal-open h3 {
+				visibility: hidden;
+			}
+			.modal-open .modal.fade.in {
+				overflow-x: visible;
+				overflow-y: visible;
+				width: 100% !important; 
+				height: 100% !important;
+				position: absolute;
+				top:0px;
+				left:0px;
+			  border-style: none !important;
+			  box-shadow: none !important;
+			}
+			/*.modal-open .modal-dialog{*/
+			/*  position: absolute !important;*/
+			/*  width: 100% !important;*/
+			/*  border-style: none !important;*/
+			/*  box-shadow:none !important;*/
+			/*}*/
+			.modal-open .modal-header{
+				display:none;
+			}
+			.modal-open .modal-footer{
+				display:none;
+			}
+			#body *{
+				font-size:xx-small !important;
+			}
+			#control {
+				display:none;
+			}
+			.nonPrintable{
+				display:none;
+			}
+			#body th,#body td{
+				margin: 0px !important;
+				padding: 0px !important;
+			}
+		}
 	</style>
 </head>
 <body>
 
 <div id="container">
 	<h3>Welcome to Manure Order Manager</h3>
+	<div class="modal fade" id="myConfirmation" tabindex="-1" role="dialog" aria-labelledby="myConfirmationLabel" aria-hidden="true">
+		 <div class="modal-dialog modal-lg">
+		    <div class="modal-content">
+		    	<div class="modal-header">
+		    		<h4 class="modal-title" id="myModalLabel">Delete Confirmation</h4>
+		    	</div>
+		    	<div class="modal-body">
+						<div class='row'>
+							<div>Are you sure you want to delete this?</div>
+						</div>
+		    	</div>
+		    	<div class="modal-footer">
+		    		<button type="button" class="btn btn-warning" data-bind='attr:{disabled:submitted},click:function(data,event){ $root.removeLine()}'>
+			    		<i class='fa fa-spinner fa-spin' data-bind='visible: submitted()' /></i>
+		    			<span data-bind='text: submitted() ?"Deleting...":"Delete"'></span>
+		    		</button>
+		    		<button type="button" class="btn btn-primary" data-dismiss="modal" data-bind='attr:{disabled:submitted}'>No</button>
+		    	</div>
+		    </div>
+		</div>
+	</div>
+	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		 <div class="modal-dialog modal-lg">
+		    <div class="modal-content">
+		    	<div class="modal-header">
+		    		<h4 class="modal-title" id="myModalLabel">Order Form</h4>
+		    	</div>
+		    	<div class="modal-body">
+		    		
+					<div class='row'>
+						<div class="col-lg-12" >
+							<form class='form-horizontal form-group-sm' data-bind='foreach: columns'>
+								<div class="form-group" >
+									<!-- ko if: $data.type == undefined && ($data.id == 'paymentamount' || $data.id == 'driverorstatus') --> 
+									<label data-bind="attr:{for: {$data.id}" class='col-sm-3 control-label'><span class='label label-warning'>Admin Only</span> <small data-bind="text:$data.name +' :'"></small></label>
+									<!-- /ko -->
+									<!-- ko ifnot: $data.type == undefined && ($data.id == 'paymentamount' || $data.id == 'driverorstatus') --> 
+									<label data-bind="attr:{for: {$data.id}" class='col-sm-3 control-label'><small data-bind="text:$data.name + ':'"></small> </label>
+									<!-- /ko -->
+									<div class='col-sm-9'>		
+										<!-- ko if: $data.type != undefined -->
+										<input  data-bind='attr:{id: $data.id, type: $data.type},value:$parent.line[$data.id]' class="form-control">
+										<!-- /ko -->
+										<!-- ko if: $data.type == undefined && $data.id != 'city' && $data.id != 'pickupordelivery' -->
+										<input type="text" data-bind='attr:{id: $data.id},value:$parent.line[$data.id]' class="form-control">
+										<!-- /ko -->
+										<!-- ko if: $data.type == undefined && $data.id == 'city' -->
+										<select data-bind="options: $parent.cities, value: $parent.line[$data.id]" class='form-control'></select>
+										<!-- /ko -->
+										<!-- ko if: $data.type == undefined && $data.id == 'pickupordelivery' -->
+										<select data-bind="options: $parent.pickupordelivery, value: $parent.line[$data.id]" class='form-control'></select>
+										<!-- /ko -->
+									</div>
+								</div>
+							</form>
+							{% set iter = [2,3,4,5,6,7] %}
+							<table class='table table-bordered'>
+								<tr>
+									<th>Type</th>
+									{% for idx in iter %}
+									<th>
+										{% set fmt = idx ~ " year ago " %}
+										{{ fmt  | date("Y") }}
+									</th>
+									{% endfor %}
+								</tr>	
+								<tr>
+									<td>Mushroom</td>
+									<!-- ko foreach: {{ iter | json_encode() }}-->
+									<td class='text-center' data-bind='text:$root.originalLine()["mushroom_"+$data]'></td>
+									<!-- /ko -->
+								</tr>
+								<tr>
+									<td>Steer</td>
+									<!-- ko foreach: {{ iter | json_encode() }} -->
+									<td class='text-center' data-bind='text:$root.originalLine()["steer_"+$data]'></td>
+									<!-- /ko -->
+								</tr>
+								<tr>
+									<td>Top soil</td>
+									<!-- ko foreach: {{ iter | json_encode() }} -->
+									<td class='text-center' data-bind='text:$root.originalLine()["topsoil_"+$data]'></td>
+									<!-- /ko -->
+								</tr>
+							</table>
+						</div>
+					</div>
+		    	</div>
+		    	<div class="modal-footer">
+		    		<button type="button" class="btn btn-warning" data-dismiss="modal" data-bind='attr:{disabled:submitted}'>Close</button>
+		    		<button type="button" class="btn btn-primary" data-bind='attr:{disabled:submitted},click:function(data,event){if($root.selectedLine() == null){ $root.addLine() } else { $root.submitModification()}}'>
+			    		<i class='fa fa-spinner fa-spin' data-bind='visible: submitted()' /></i>
+		    			<span data-bind='text: submitted() ?"Saving...":"Save Changes"'></span>
+		    		</button>
+		    	</div>
+		    </div>
+		</div>
+	</div>
 
 	<div id="body">
-			<div class="modal fade" id="myConfirmation" tabindex="-1" role="dialog" aria-labelledby="myConfirmationLabel" aria-hidden="true">
-				 <div class="modal-dialog modal-lg">
-				    <div class="modal-content">
-				    	<div class="modal-header">
-				    		<h4 class="modal-title" id="myModalLabel">Delete Confirmation</h4>
-				    	</div>
-				    	<div class="modal-body">
-								<div class='row'>
-									<div>Are you sure you want to delete this?</div>
-								</div>
-				    	</div>
-				    	<div class="modal-footer">
-				    		<button type="button" class="btn btn-warning" data-bind='attr:{disabled:submitted},click:function(data,event){ $root.removeLine()}'>
-					    		<i class='fa fa-spinner fa-spin' data-bind='visible: submitted()' /></i>
-				    			<span data-bind='text: submitted() ?"Deleting...":"Delete"'></span>
-				    		</button>
-				    		<button type="button" class="btn btn-primary" data-dismiss="modal" data-bind='attr:{disabled:submitted}'>No</button>
-				    	</div>
-				    </div>
-				</div>
-			</div>
-			<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-				 <div class="modal-dialog modal-lg">
-				    <div class="modal-content">
-				    	<div class="modal-header">
-				    		<h4 class="modal-title" id="myModalLabel">Order Form</h4>
-				    	</div>
-				    	<div class="modal-body">
-							<div class='row'>
-								<div class="col-lg-12" >
-									<form class='form-horizontal form-group-sm' data-bind='foreach: columns'>
-										<div class="form-group">
-											<!-- ko if: $data.type == undefined && ($data.id == 'paymentamount' || $data.id == 'driverorstatus') --> 
-											<label data-bind="attr:{for: {$data.id}" class='col-sm-3 control-label'><span class='label label-warning'>Admin Only</span> <small data-bind="text:$data.name +' :'"></small></label>
-											<!-- /ko -->
-											<!-- ko ifnot: $data.type == undefined && ($data.id == 'paymentamount' || $data.id == 'driverorstatus') --> 
-											<label data-bind="attr:{for: {$data.id}" class='col-sm-3 control-label'><small data-bind="text:$data.name + ':'"></small> </label>
-											<!-- /ko -->
-											<div class='col-sm-9'>		
-												<!-- ko if: $data.type != undefined -->
-												<input  data-bind='attr:{id: $data.id, type: $data.type},value:$parent.line[$data.id]' class="form-control">
-												<!-- /ko -->
-												<!-- ko if: $data.type == undefined && $data.id != 'city' && $data.id != 'pickupordelivery' -->
-												<input type="text" data-bind='attr:{id: $data.id},value:$parent.line[$data.id]' class="form-control">
-												<!-- /ko -->
-												<!-- ko if: $data.type == undefined && $data.id == 'city' -->
-												<select data-bind="options: $parent.cities, value: $parent.line[$data.id]" class='form-control'></select>
-												<!-- /ko -->
-												<!-- ko if: $data.type == undefined && $data.id == 'pickupordelivery' -->
-												<select data-bind="options: $parent.pickupordelivery, value: $parent.line[$data.id]" class='form-control'></select>
-												<!-- /ko -->
-											</div>
-										</div>
-									</form>
-									{% set iter = [2,3,4,5,6,7] %}
-									<table class='table table-bordered'>
-										<tr>
-											<th>Type</th>
-											{% for idx in iter %}
-											<th>
-												{% set fmt = idx ~ " year ago " %}
-												{{ fmt  | date("Y") }}
-											</th>
-											{% endfor %}
-										</tr>	
-										<tr>
-											<td>Mushroom</td>
-											<!-- ko foreach: {{ iter | json_encode() }}-->
-											<td class='text-center' data-bind='text:$root.originalLine()["mushroom_"+$data]'></td>
-											<!-- /ko -->
-										</tr>
-										<tr>
-											<td>Steer</td>
-											<!-- ko foreach: {{ iter | json_encode() }} -->
-											<td class='text-center' data-bind='text:$root.originalLine()["steer_"+$data]'></td>
-											<!-- /ko -->
-										</tr>
-										<tr>
-											<td>Top soil</td>
-											<!-- ko foreach: {{ iter | json_encode() }} -->
-											<td class='text-center' data-bind='text:$root.originalLine()["topsoil_"+$data]'></td>
-											<!-- /ko -->
-										</tr>
-									</table>
-								</div>
-							</div>
-				    	</div>
-				    	<div class="modal-footer">
-				    		<button type="button" class="btn btn-warning" data-dismiss="modal" data-bind='attr:{disabled:submitted}'>Close</button>
-				    		<button type="button" class="btn btn-primary" data-bind='attr:{disabled:submitted},click:function(data,event){if($root.selectedLine() == null){ $root.addLine() } else { $root.submitModification()}}'>
-					    		<i class='fa fa-spinner fa-spin' data-bind='visible: submitted()' /></i>
-				    			<span data-bind='text: submitted() ?"Saving...":"Save Changes"'></span>
-				    		</button>
-				    	</div>
-				    </div>
-				</div>
-			</div>
-			<div class="row well" data-spy="affix" data-offset-top="50">
+			<div id='control' class="row well" data-spy="affix" data-offset-top="50">
 				<div class='pull-left' >
 				<button  class="btn btn-sm btn-primary" data-bind='click:openNewForm'><span class='glyphicon glyphicon-plus'></span> Add Entry</button></div>
 				<div class='col-lg-11 '>
@@ -395,8 +455,8 @@
 						<caption>Manure Order Table</caption>
 						<thead>
 							<tr>
-								<th class='nowrap'><div><span class="label label-success">Modify</span></div></th>
-								<th class='nowrap'><div><span class="label label-danger">Delete</span></div></th>
+								<th class='nowrap nonPrintable'><div><span class="label label-success">Modify</span></div></th>
+								<th class='nowrap nonPrintable'><div><span class="label label-danger">Delete</span></div></th>
 								<!-- ko foreach: header -->
 								<th class='nowrap'><div class='capitalize' data-bind='text: $data.header'><div></th>
 								<!-- /ko -->
@@ -404,8 +464,8 @@
 						</thead>
 						<tbody data-bind="foreach: filteredRows">
 							<tr>
-								<td><button class='btn btn-success' data-bind='click:function(data,event){ $parent.modifyLine(data, $index()) }'><span class='glyphicon glyphicon-wrench'></span></button></td>
-								<td><button class='btn btn-danger' data-bind='click:function(data,event){ $parent.showConfirmation($index(),event) }'><span class='glyphicon glyphicon-remove'></span></button></td>
+								<td class='nonPrintable'><button class='btn btn-success nonPrintable' data-bind='click:function(data,event){ $parent.modifyLine(data, $index()) }'><span class='glyphicon glyphicon-wrench'></span></button></td>
+								<td class='nonPrintable'><button class='btn btn-danger nonPrintable' data-bind='click:function(data,event){ $parent.showConfirmation($index(),event) }'><span class='glyphicon glyphicon-remove'></span></button></td>
 								<td><span data-bind='text: $data.street'></span> </td>
 								<td><span data-bind='text: $data.number'></span> </td>
 								<td><span data-bind='text: $data.city'></span> </td>
