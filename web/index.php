@@ -106,6 +106,7 @@ $app->get('/sheetData', function() use($app, $title, $worksheetTitle,  $key_file
 	for($i = 11; $i < count($listEntries); $i++){
 		
 		$vals = $listEntries[$i]->getValues();
+		$vals['idx'] = $i;
 		if(strpos($vals['street'], "INSERT-DATA-ROWS-ABOVE-THIS-ONE-MARKER") !== false || strpos($vals['street'], "TOTALS") !== false){
 			continue;
 		}
@@ -133,7 +134,7 @@ $app->put('/', function(Request $request) use($app, $title, $worksheetTitle){
 
 	$listFeed = $worksheet->getListFeed();
 	$listEntries = $listFeed->getEntries();
-	$listEntry = $listEntries[$request->get("line_num")+11];
+	$listEntry = $listEntries[$request->get("line_num")];
 	$toUpdate = array();
 	foreach($request->get("line") as $idx => $entry){
 		$toUpdate[$idx] = $entry;
@@ -180,7 +181,7 @@ $app->delete("/", function(Request $request) use($app, $title, $worksheetTitle){
 
 	$listFeed = $worksheet->getListFeed();
 	$listEntries = $listFeed->getEntries();
-	$listEntry = $listEntries[$request->get("line_num")+11];
+	$listEntry = $listEntries[$request->get("line_num")];
 	$listEntry->delete();
 	return new Response("success");
 

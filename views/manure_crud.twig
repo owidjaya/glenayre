@@ -94,6 +94,7 @@
 				self.modifyLine = function(line, line_num){
 					self.originalLine(line);
 					for(var prop in self.line){
+						if(prop == "idx") continue;
 						self.line[prop](line[prop]);
 					}
 					$('#myModal').modal('show');
@@ -464,8 +465,8 @@
 						</thead>
 						<tbody data-bind="foreach: filteredRows">
 							<tr>
-								<td class='nonPrintable'><button class='btn btn-success nonPrintable' data-bind='click:function(data,event){ $parent.modifyLine(data, $index()) }'><span class='glyphicon glyphicon-wrench'></span></button></td>
-								<td class='nonPrintable'><button class='btn btn-danger nonPrintable' data-bind='click:function(data,event){ $parent.showConfirmation($index(),event) }'><span class='glyphicon glyphicon-remove'></span></button></td>
+								<td class='nonPrintable'><button class='btn btn-success nonPrintable' data-bind='click:function(data,event){ $parent.modifyLine(data,data.idx) }'><span class='glyphicon glyphicon-wrench'></span></button></td>
+								<td class='nonPrintable'><button class='btn btn-danger nonPrintable' data-bind='click:function(data,event){ $parent.showConfirmation(data.idx,event) }'><span class='glyphicon glyphicon-remove'></span></button></td>
 								<td><span data-bind='text: $data.street'></span> </td>
 								<td><span data-bind='text: $data.number'></span> </td>
 								<td><span data-bind='text: $data.city'></span> </td>
