@@ -29,7 +29,7 @@
 				self.filter = {};
 				self.line_num;
 				self.originalLine = ko.observable({});
-				self.cities = ["Anmore", "Burnaby", "Coquitlam", "New Westminster", "Port Coquitlam", "Port Moody", "Other"];
+				self.cities = ["","Anmore", "Burnaby", "Coquitlam", "New Westminster", "Port Coquitlam", "Port Moody", "Other"];
 				self.pickupordelivery = ["","Pickup", "Delivery"];
 				for(var i = 0; i < self.columns.length; i++){
 					if(self.columns[i].type == "email"){
@@ -386,6 +386,8 @@
 									</div>
 								</div>
 							</form>
+							<!-- ko if: $root.selectedLine() != undefined -->
+							<h4>Previous Order</h4>
 							{% set iter = [2,3,4,5,6,7] %}
 							<table class='table table-bordered'>
 								<tr>
@@ -416,6 +418,7 @@
 									<!-- /ko -->
 								</tr>
 							</table>
+							<!-- /ko -->
 						</div>
 					</div>
 		    	</div>
