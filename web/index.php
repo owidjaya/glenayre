@@ -182,8 +182,24 @@ $app->delete("/", function(Request $request) use($app, $title, $worksheetTitle){
 	$listFeed = $worksheet->getListFeed();
 	$listEntries = $listFeed->getEntries();
 	$listEntry = $listEntries[$request->get("line_num")];
-	$listEntry->delete();
-	return new Response("success");
+	$line = $request->get("line");
+	if(isset($listEntry)){
+		$values = $listEntry->getValues();
+		if($values['street'] == $line['street'] &&
+			$values['number'] == $line['number'] &&
+			$values['city'] == $line['city'] &&
+			$values['contact'] == $line['contact'] &&
+			$values['phone'] == $line['phone'] &&
+			$values['email'] == $line['email']
+		){
+			$listEntry->delete();
+			return new Response("success");
+		}
+	}
+	else{
+		return new Response("fail");
+		
+	}
 
 });
 $app->run();
