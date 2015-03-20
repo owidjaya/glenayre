@@ -241,7 +241,6 @@
 	</script>
 	<style>
 	  .floatThead-wrapper > div{
-	  	margin-top:180px !important;
 	  	background-color:white;
 	  }
 		.filterForm{
@@ -457,9 +456,9 @@
 									<input class="form-control input-sm" data-bind='attr:{placeholder:"Filter " + $data.name},value: $parent.filter[$data.id]'>
 								</div>
 								<!-- /ko -->
+								<button  class='btn btn-warning btn-sm' data-bind='click: resetFilter'>Reset</button>
+								<button  class="btn btn-sm btn-primary" data-bind='click:openNewForm'><span class='glyphicon glyphicon-plus'></span> Add Entry</button>
 							</form>
-							<button  class='btn btn-warning btn-sm' data-bind='click: resetFilter'>Reset</button>
-							<button  class="btn btn-sm btn-primary" data-bind='click:openNewForm'><span class='glyphicon glyphicon-plus'></span> Add Entry</button>
 				</div>
 			</div>
 			<div class="col-lg-12 navbar-fixed-bottom" data-bind='visible:loadingData()'><div class='bg-primary pull-right text-center col-lg-2'><i class='fa fa-cog fa-spin' ></i> Loading Data....</div></div>
