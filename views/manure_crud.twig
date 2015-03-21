@@ -159,31 +159,7 @@
 					}
 					$('#myConfirmation').modal('show');
 				}
-				self.removeLine = function(){
-					self.setSubmitted(true);
-					data = {
-						"line_num": self.line_num,
-						"line": self.line
-					};
-					$.ajax({
-						url: "/",
-						data: data,
-						type: "DELETE",
-						dataType: "json",
-					})
-					.done(function(data){
-					})
-					.always(function(data){
-						if(data.responseText == "success" || data.responseText == "fail" ){
-							self.line_num = undefined;
-							self.getData();							
-							self.setSubmitted(false);
-							$('#myConfirmation').modal('hide');
-						}
-					})
-					.fail(function(){
-					});	
-				}
+				
 				self.addLine = function(){
 					self.setSubmitted(true);
 					data = {
@@ -469,7 +445,6 @@
 						<thead>
 							<tr>
 								<th class='nowrap nonPrintable'><div><span class="label label-success">Modify</span></div></th>
-								<th class='nowrap nonPrintable'><div><span class="label label-danger">Delete</span></div></th>
 								<!-- ko foreach: header -->
 								<th class='nowrap'><div class='capitalize' data-bind='text: $data.header'><div></th>
 								<!-- /ko -->
@@ -478,7 +453,6 @@
 						<tbody data-bind="foreach: filteredRows">
 							<tr>
 								<td class='nonPrintable'><button class='btn btn-success nonPrintable' data-bind='click:function(data,event){ $parent.modifyLine(data,data.idx) }'><span class='glyphicon glyphicon-wrench'></span></button></td>
-								<td class='nonPrintable'><button class='btn btn-danger nonPrintable' data-bind='click:function(data,event){ $parent.showConfirmation(data,data.idx,event) }'><span class='glyphicon glyphicon-remove'></span></button></td>
 								<td><span data-bind='text: $data.street'></span> </td>
 								<td><span data-bind='text: $data.number'></span> </td>
 								<td><span data-bind='text: $data.city'></span> </td>
